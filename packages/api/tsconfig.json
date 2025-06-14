@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "src",
     "outDir": "dist",
     "esModuleInterop": true,
     "strict": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": ["src"]
 }

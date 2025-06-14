@@ -8,7 +8,15 @@
     "start": "pnpm --filter ./packages/api start",
     "docker:up": "docker-compose up --build",
     "docker:down": "docker-compose down",
-    "docker:start": "./start.sh"
+    "docker:start": "./start.sh",
+    "api:dev": "npx ts-node-dev --esm ./packages/api/src/server.ts"
   },
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.20.3"
+  }
 }

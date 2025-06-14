@@ -1,10 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "dist"
+    "noEmit": false,
+    "outDir": "dist",
+    "allowImportingTsExtensions": false
   },
-  "include": ["src/**/*"]
+  "include": ["src"]
 } 

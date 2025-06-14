@@ -1,5 +1,5 @@
 import express from 'express';
-import { startWorker } from './temporal/worker.js';
+import { startWorker } from "./temporal/worker.ts";
 
 const app = express();
 const port = process.env.PORT || 3000;
