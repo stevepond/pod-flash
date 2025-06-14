@@ -1,0 +1,11 @@
+{
+  "name": "pod-flash",
+  "private": true,
+  "packageManager": "pnpm@8",
+  "scripts": {
+    "dev": "pnpm --filter ./packages/api dev & pnpm --filter ./packages/ui dev",
+    "build": "pnpm --filter ./packages/api build && pnpm --filter ./packages/ui build",
+    "start": "pnpm --filter ./packages/api start"
+  },
+  "workspaces": ["packages/*"]
+}
