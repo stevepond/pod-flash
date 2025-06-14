@@ -1,0 +1,55 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    command: pnpm start
+    depends_on:
+      temporal:
+        condition: service_started
+      cassandra:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  temporal:
+    image: temporalio/auto-setup:1.22
+    ports:
+      - "7233:7233"
+    environment:
+      - SKIP_SCHEMA_SETUP=false
+      - DB=cassandra
+      - CASSANDRA_SEEDS=cassandra
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_USER=
+      - CASSANDRA_PASSWORD=
+      - CASSANDRA_KEYSPACE=temporal
+      - CASSANDRA_REPLICATION_FACTOR=1
+    depends_on:
+      cassandra:
+        condition: service_healthy
+
+  cassandra:
+    image: cassandra:4
+    ports:
+      - "9042:9042"
+    healthcheck:
+      test: ["CMD", "cqlsh", "-u cassandra", "-p cassandra", "-e describe keyspaces"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    ports:
+      - "9000:9000"
+      - "9001:9001" 
