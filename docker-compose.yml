@@ -7,7 +7,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - TEMPORAL_LOG_LEVEL=warn
     command: pnpm start
+    develop:
+      watch:
+        - path: ./packages/api/src
+          target: /app/packages/api/src
+          action: sync
     depends_on:
       temporal:
         condition: service_started
@@ -29,6 +35,14 @@ services:
       - CASSANDRA_PASSWORD=
       - CASSANDRA_KEYSPACE=temporal
       - CASSANDRA_REPLICATION_FACTOR=1
+      - LOG_LEVEL=warn
+    volumes:
+      - ./temporal-logging.yaml:/etc/temporal/config/logging.yaml
+    develop:
+      watch:
+        - path: ./temporal-logging.yaml
+          target: /etc/temporal/config/logging.yaml
+          action: sync
     depends_on:
       cassandra:
         condition: service_healthy
@@ -37,6 +51,15 @@ services:
     image: cassandra:4
     ports:
       - "9042:9042"
+    environment:
+      - CASSANDRA_LOG_LEVEL=WARN
+    volumes:
+      - ./cassandra-logback.xml:/etc/cassandra/logback.xml
+    develop:
+      watch:
+        - path: ./cassandra-logback.xml
+          target: /etc/cassandra/logback.xml
+          action: sync
     healthcheck:
       test: ["CMD", "cqlsh", "-u cassandra", "-p cassandra", "-e describe keyspaces"]
       interval: 10s
@@ -50,6 +73,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
+      MINIO_LOG_LEVEL: warn
     ports:
       - "9000:9000"
       - "9001:9001" 
