@@ -5,9 +5,14 @@ interface DigestProps {
   digestId: string;
 }
 
+interface Summary {
+  summary: string;
+  keywords: string[];
+}
+
 export function DigestComponent({ digestId }: DigestProps) {
   // const [digest, setDigest] = useState<Digest | null>(null);
-  const [summary, setSummary] = useState<string | null>(null);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +32,9 @@ export function DigestComponent({ digestId }: DigestProps) {
     setLoading(true);
     setError(null);
     try {
-      const newSummary = await generateSummary(digestId);
+      const newSummary = (await generateSummary(
+        digestId
+      )) as unknown as Summary;
       setSummary(newSummary);
     } catch (err) {
       setError("Failed to generate summary");
@@ -47,7 +54,10 @@ export function DigestComponent({ digestId }: DigestProps) {
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Summary</h2>
         {summary ? (
-          <p className="text-gray-700">{summary}</p>
+          <>
+            <p className="text-gray-700">{summary.summary}</p>
+            <p className="text-gray-700">{summary.keywords.join(", ")}</p>
+          </>
         ) : (
           <button
             onClick={handleGenerateSummary}

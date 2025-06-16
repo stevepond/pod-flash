@@ -9,13 +9,18 @@ import {
 } from "@effect/platform";
 
 // Define the schema at the top level
-const PredictionsSchema = Schema.Struct({
-  predictions: Schema.Struct({
-    summary: Schema.String,
-    keywords: Schema.Array(Schema.String),
-  }),
+const FlatSchema = Schema.Struct({
+  summary: Schema.String,
+  keywords: Schema.Array(Schema.String),
 });
-export type Predictions = Schema.Schema.Type<typeof PredictionsSchema>;
+const NestedSchema = Schema.Struct({
+  predictions: FlatSchema,
+});
+// Databricks may wrap predictions in an array
+const NestedObjSchema = Schema.Struct({
+  predictions: FlatSchema,
+});
+export type Predictions = Schema.Schema.Type<typeof FlatSchema>;
 
 const transcript = `
 Over the last decade, remote work has evolved from a rare perk offered by forward-thinking tech companies to a mainstream employment model accelerated by global necessity. The COVID-19 pandemic served as a catalyst, forcing millions of organizations to pivot rapidly to work-from-home arrangements. While many expected this shift to be temporary, the long-term impacts are now deeply embedded in the global labor market.
@@ -48,12 +53,28 @@ export async function generateSummary(digestId: string): Promise<Predictions> {
           "Content-Type": "application/json",
         },
         body: HttpBody.unsafeJson({
-          inputs: [{ transcript }],
+          inputs: {
+            transcript: [transcript],
+          },
         }),
       }
     ).pipe(
+      Effect.tap((raw) =>
+        Effect.sync(() =>
+          console.log("Databricks response", JSON.stringify(raw))
+        )
+      ),
       Effect.flatMap((res: HttpClientResponse.HttpClientResponse) => res.json),
-      Effect.flatMap((data) => Schema.decodeUnknown(PredictionsSchema)(data)),
+      // Try flat schema first, then nested object schema
+      Effect.flatMap((data) =>
+        Schema.decodeUnknown(FlatSchema)(data).pipe(
+          Effect.orElse(() =>
+            Schema.decodeUnknown(NestedObjSchema)(data).pipe(
+              Effect.map((w) => w.predictions)
+            )
+          )
+        )
+      ),
       Effect.catchAll((error) => {
         console.error("Failed to process summary request", error);
         return Effect.fail(error);
