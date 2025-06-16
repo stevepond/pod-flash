@@ -1,5 +1,6 @@
 import { proxyActivities } from '@temporalio/workflow';
 import type * as activities from "./activities.js";
+import type { Predictions } from "./activities.js";
 
 // Create proxies for every activity we want to call from workflows
 const {
@@ -40,6 +41,6 @@ export async function processPodcastWorkflow(digestId: string): Promise<void> {
  */
 export async function generateSummaryWorkflow(
   digestId: string
-): Promise<string> {
+): Promise<Predictions> {
   return generateSummaryActivity(digestId);
 } 

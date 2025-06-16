@@ -23,7 +23,9 @@ async function getTemporalClient() {
  * Start a Temporal workflow that generates the podcast summary and wait
  * for its result.
  */
-export async function generateSummary(digestId: string): Promise<string> {
+export async function generateSummary(
+  digestId: string
+): Promise<SummaryResponse> {
   const client = await getTemporalClient();
 
   // A unique workflow-id lets us trigger multiple summary requests safely.

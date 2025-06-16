@@ -15,16 +15,16 @@ const PredictionsSchema = Schema.Struct({
     keywords: Schema.Array(Schema.String),
   }),
 });
-type Predictions = Schema.Schema.Type<typeof PredictionsSchema>;
+export type Predictions = Schema.Schema.Type<typeof PredictionsSchema>;
 
 const transcript = `
 Over the last decade, remote work has evolved from a rare perk offered by forward-thinking tech companies to a mainstream employment model accelerated by global necessity. The COVID-19 pandemic served as a catalyst, forcing millions of organizations to pivot rapidly to work-from-home arrangements. While many expected this shift to be temporary, the long-term impacts are now deeply embedded in the global labor market.
 
-At the core of this transformation is a redefinition of work itself—not just where it’s performed, but how productivity, collaboration, and culture are measured. In traditional office settings, managers often equated productivity with physical presence. With the rise of remote work, that notion has shifted toward output-oriented metrics. Employees are judged more by deliverables and results than by hours clocked or face time, which has led to a surge in interest around asynchronous communication tools, project management software, and performance-based evaluations.
+At the core of this transformation is a redefinition of work itself—not just where it's performed, but how productivity, collaboration, and culture are measured. In traditional office settings, managers often equated productivity with physical presence. With the rise of remote work, that notion has shifted toward output-oriented metrics. Employees are judged more by deliverables and results than by hours clocked or face time, which has led to a surge in interest around asynchronous communication tools, project management software, and performance-based evaluations.
 
 One of the most significant benefits reported by remote workers is improved work-life balance. Without the stress and time commitment of commuting, many individuals find they have more hours in the day to focus on personal well-being, family, or passion projects. This flexibility has also opened the door for workers to relocate from expensive urban centers to more affordable locations, further boosting their quality of life. For employers, this relocation trend offers access to a broader, more diverse talent pool unconstrained by geographic boundaries.
 
-However, remote work is not without its challenges. The loss of in-person interaction can hinder collaboration and spontaneous innovation, particularly in creative or cross-functional teams. Companies have been experimenting with virtual whiteboards, regular video check-ins, and “digital water coolers” to try to bridge the social gap. Still, issues like Zoom fatigue and feelings of isolation persist. Some organizations have responded by adopting hybrid models, where employees split their time between home and the office to strike a balance between flexibility and connection.
+However, remote work is not without its challenges. The loss of in-person interaction can hinder collaboration and spontaneous innovation, particularly in creative or cross-functional teams. Companies have been experimenting with virtual whiteboards, regular video check-ins, and "digital water coolers" to try to bridge the social gap. Still, issues like Zoom fatigue and feelings of isolation persist. Some organizations have responded by adopting hybrid models, where employees split their time between home and the office to strike a balance between flexibility and connection.
 
 The shift to remote work has also had significant implications for urban infrastructure, commercial real estate, and local economies. Cities that once thrived on the daily influx of commuters are now grappling with underutilized office space, declining public transit revenue, and a shift in demand toward suburban services. On the flip side, smaller cities and rural areas are seeing renewed interest as viable hubs for remote workers, triggering growth in local economies and increased demand for high-speed internet infrastructure.
 
@@ -38,7 +38,7 @@ export async function processPodcastAudio(digestId: string): Promise<void> {
   console.log(`Processing audio for digest ${digestId}`);
 }
 
-export async function generateSummary(digestId: string): Promise<string> {
+export async function generateSummary(digestId: string): Promise<Predictions> {
   return Effect.runPromise(
     HttpClient.post(
       "https://dbc-058ab750-8aad.cloud.databricks.com/serving-endpoints/summarise/invocations",
@@ -54,7 +54,6 @@ export async function generateSummary(digestId: string): Promise<string> {
     ).pipe(
       Effect.flatMap((res: HttpClientResponse.HttpClientResponse) => res.json),
       Effect.flatMap((data) => Schema.decodeUnknown(PredictionsSchema)(data)),
-      Effect.map((parsed) => parsed.predictions.summary),
       Effect.catchAll((error) => {
         console.error("Failed to process summary request", error);
         return Effect.fail(error);
