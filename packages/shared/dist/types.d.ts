@@ -6,3 +6,4 @@ export interface Digest {
     duration?: number;
     status: 'PROCESSING' | 'COMPLETE' | 'ERROR';
 }
+//# sourceMappingURL=types.d.ts.map

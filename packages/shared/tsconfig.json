@@ -6,6 +6,11 @@
     "rootDir": "src",
     "outDir": "dist",
     "esModuleInterop": true,
-    "strict": true
-  }
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
 }

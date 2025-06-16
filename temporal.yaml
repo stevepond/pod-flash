@@ -1,0 +1,78 @@
+log:
+  stdout: true
+  level: warn
+
+persistence:
+  datastores:
+    default:
+      cassandra:
+        hosts: cassandra
+        port: 9042
+        keyspace: temporal
+        replicationFactor: 1
+    visibility:
+      cassandra:
+        hosts: cassandra
+        port: 9042
+        keyspace: temporal_visibility
+        replicationFactor: 1
+
+global:
+  pprof:
+    port: 7936
+
+services:
+  frontend:
+    rpc:
+      grpcPort: 7233
+      membershipPort: 6933
+      bindOnLocalHost: false
+
+  matching:
+    rpc:
+      grpcPort: 7235
+      membershipPort: 6935
+      bindOnLocalHost: false
+
+  history:
+    rpc:
+      grpcPort: 7234
+      membershipPort: 6934
+      bindOnLocalHost: false
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "active"
+  currentClusterName: "active"
+  clusterInformation:
+    active:
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "127.0.0.1:7233"
+
+dcRedirectionPolicy:
+  policy: "noop"
+  toDC: ""
+
+kafka:
+  tls:
+    enabled: false
+  clusters:
+    test:
+      brokers:
+        - 127.0.0.1:9092
+  topics:
+    temporal-visibility-dev:
+      cluster: test
+    temporal-visibility-dev-dlq:
+      cluster: test
+    temporal-visibility-dev-dlq-v2:
+      cluster: test
+    temporal-visibility-dev-v2:
+      cluster: test
+    temporal-visibility-dev-v2-dlq:
+      cluster: test
+    temporal-visibility-dev-v2-dlq-v2:
+      cluster: test 

@@ -6,5 +6,5 @@ export interface Digest {
     duration: number;
     status: 'PROCESSING' | 'COMPLETE' | 'ERROR';
 }
-declare const _default: {};
-export default _default;
+export * from "./summary.js";
+//# sourceMappingURL=index.d.ts.map

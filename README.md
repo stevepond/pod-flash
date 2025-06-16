@@ -6,6 +6,7 @@ Monorepo for Podcast Digest application. Includes API server, React UI, shared u
 - `packages/api` – Express API server written in TypeScript
 - `packages/ui` – React front-end built with Vite
 - `packages/shared` – Shared TypeScript types
+- `packages/ml_server` – Python Flask microservice for transcript summarization
 - `infra` – docker-compose services (Temporal, Cassandra, MinIO)
 
 ## Development

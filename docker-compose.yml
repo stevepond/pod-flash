@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=development
       - TEMPORAL_LOG_LEVEL=warn
+      - DATABRICKS_TOKEN=${DATABRICKS_TOKEN} 
     command: pnpm start
     develop:
       watch:
@@ -23,29 +24,58 @@ services:
         condition: service_started
 
   temporal:
-    image: temporalio/auto-setup:1.22
+    image: temporalio/auto-setup:1.22.3
     ports:
       - "7233:7233"
+      - "7234:7234"
+      - "7235:7235"
     environment:
-      - SKIP_SCHEMA_SETUP=false
+      - LOG_LEVEL=warn
+      - SERVICES=frontend:matching:history:worker
+      - ENABLE_ES=false
+      - SKIP_DEFAULT_NAMESPACE_CREATION=false
       - DB=cassandra
       - CASSANDRA_SEEDS=cassandra
       - CASSANDRA_PORT=9042
-      - CASSANDRA_USER=
-      - CASSANDRA_PASSWORD=
       - CASSANDRA_KEYSPACE=temporal
       - CASSANDRA_REPLICATION_FACTOR=1
-      - LOG_LEVEL=warn
-    volumes:
-      - ./temporal-logging.yaml:/etc/temporal/config/logging.yaml
-    develop:
-      watch:
-        - path: ./temporal-logging.yaml
-          target: /etc/temporal/config/logging.yaml
-          action: sync
     depends_on:
       cassandra:
         condition: service_healthy
+
+  temporal-admin-tools:
+    image: temporalio/admin-tools:1.22.3
+    depends_on:
+      temporal:
+        condition: service_started
+      cassandra:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for Temporal to be ready...' &&
+        sleep 30 &&
+        for i in $(seq 1 5); do
+          echo 'Attempt $i to check cluster health...' &&
+          if temporal operator cluster health --address temporal:7233; then
+            echo 'Cluster is healthy, creating namespaces...' &&
+            temporal operator namespace create default --retention 1 &&
+            temporal operator namespace create temporal-system --retention 1 &&
+            break
+          fi
+          echo 'Cluster not ready yet, waiting...' &&
+          sleep 30
+        done
+      "
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "8233:8080"
+    depends_on:
+      temporal:
+        condition: service_started
 
   cassandra:
     image: cassandra:4
@@ -76,4 +106,4 @@ services:
       MINIO_LOG_LEVEL: warn
     ports:
       - "9000:9000"
-      - "9001:9001" 
+      - "9001:9001"
