@@ -64,3 +64,15 @@ export async function processPodcastWorkflow(digestId: string): Promise<void> {
     `processPodcastWorkflow started successfully for digest: ${digestId}`
   );
 }
+
+export async function trainUserModel(
+  userId: string
+): Promise<{ recommendations: string[]; clues: string }> {
+  const client = await getTemporalClient();
+  const handle = await client.workflow.start("trainUserModelWorkflow", {
+    taskQueue: "podcast-digest",
+    workflowId: `train-user-${userId}-${Date.now()}`,
+    args: [userId],
+  });
+  return handle.result();
+}

@@ -5,8 +5,9 @@ interface Activities {
   processPodcastAudio(digestId: string): Promise<void>;
   generateSummary(digestId: string): Promise<{ summary: string; keywords: string[] }>;
   extractKeywords(digestId: string): Promise<string[]>;
+  trainUserRecommendations(userId: string): Promise<{ recommendations: string[]; clues: string }>;
   updateDigestStatus(
-    digestId: string, 
+    digestId: string,
     status: "PROCESSING" | "COMPLETE" | "ERROR",
     updates?: { summary?: string; keywords?: string[]; duration?: number }
   ): Promise<void>;
@@ -17,6 +18,7 @@ const {
   processPodcastAudio,
   generateSummary: generateSummaryActivity,
   extractKeywords: extractKeywordsActivity,
+  trainUserRecommendations: trainUserRecommendationsActivity,
   updateDigestStatus: updateDigestStatusActivity,
 } = proxyActivities<Activities>({
   startToCloseTimeout: "1 hour",
@@ -81,4 +83,11 @@ export async function generateSummaryWorkflow(
     summary: result.summary,
     keywords: [...result.keywords],
   };
-} 
+}
+
+export async function trainUserModelWorkflow(
+  userId: string
+): Promise<{ recommendations: string[]; clues: string }> {
+  const result = await trainUserRecommendationsActivity(userId);
+  return { recommendations: [...result.recommendations], clues: result.clues };
+}
