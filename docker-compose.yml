@@ -17,6 +17,7 @@ services:
       - S3_BUCKET_NAME=pod-flash
       - MONGODB_URI=mongodb://mongodb:27017/pod-flash
       - REDIS_URL=redis://redis:6379
+      - ML_SIDECAR_URL=http://ml-sidecar:5000
     command: pnpm start
     develop:
       watch:
@@ -152,6 +153,21 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  ml-sidecar:
+    build:
+      context: .
+      dockerfile: services/ml-sidecar/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/pod-flash
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   minio_data:
