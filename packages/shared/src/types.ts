@@ -4,5 +4,5 @@ export interface Digest {
   summary?: string;
   keywords?: string[];
   duration?: number;
-  status: 'PROCESSING' | 'COMPLETE' | 'ERROR';
-}
+  status: "PROCESSING" | "COMPLETE" | "ERROR";
+} 

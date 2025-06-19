@@ -16,18 +16,18 @@ COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/tsconfig.json ./packages/shared/
 
 # Install dependencies (links workspaces)
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install
 
 # Copy the rest of the monorepo
 COPY packages ./packages
 
 # Build shared first
 WORKDIR /app/packages/shared
-RUN mkdir -p dist && tsc -b
+RUN pnpm build
 
 # Build api
 WORKDIR /app/packages/api
-RUN mkdir -p dist && tsc -b
+RUN pnpm build
 
 # Debug: List the contents of dist/temporal after build
 RUN ls -l /app/packages/api/dist/temporal || true

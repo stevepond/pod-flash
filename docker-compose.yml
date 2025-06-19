@@ -8,7 +8,15 @@ services:
     environment:
       - NODE_ENV=development
       - TEMPORAL_LOG_LEVEL=warn
-      - DATABRICKS_TOKEN=${DATABRICKS_TOKEN} 
+      - DATABRICKS_TOKEN=${DATABRICKS_TOKEN}
+      - DATABRICKS_ENDPOINT=${DATABRICKS_ENDPOINT}
+      - S3_ENDPOINT=http://minio:9000
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=minio
+      - S3_SECRET_ACCESS_KEY=minio123
+      - S3_BUCKET_NAME=pod-flash
+      - MONGODB_URI=mongodb://mongodb:27017/pod-flash
+      - REDIS_URL=redis://redis:6379
     command: pnpm start
     develop:
       watch:
@@ -22,6 +30,10 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   temporal:
     image: temporalio/auto-setup:1.22.3
@@ -107,3 +119,41 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  minio_data:
+  mongodb_data:
+  redis_data:

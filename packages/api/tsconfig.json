@@ -1,15 +1,19 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pod-flash/shared": ["../shared/src/index.ts"],
+      "@pod-flash/shared/*": ["../shared/src/*"]
+    },
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
     "skipLibCheck": true,
-    "declaration": true
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"]
 }

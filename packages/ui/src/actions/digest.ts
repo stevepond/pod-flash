@@ -1,4 +1,8 @@
-export async function generateSummary(digestId: string): Promise<string> {
+import { Digest } from "@pod-flash/shared";
+
+export async function generateSummary(
+  digestId: string
+): Promise<{ summary: string; keywords: string[] }> {
   try {
     const response = await fetch(
       `${
@@ -16,11 +20,33 @@ export async function generateSummary(digestId: string): Promise<string> {
       throw new Error(`Failed: ${response.statusText}`);
     }
 
-    const { summary } = (await response.json()) as { summary: string };
-    return summary;
+    return await response.json();
   } catch (error) {
     console.error("Failed to generate summary:", error);
     throw new Error("Failed to generate summary");
+  }
+}
+
+export async function getDigests(): Promise<Digest[]> {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/digests`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch digests:", error);
+    throw new Error("Failed to fetch digests");
   }
 }
 
