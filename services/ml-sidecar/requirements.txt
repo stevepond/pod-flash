@@ -2,3 +2,16 @@ fastapi
 uvicorn[standard]
 pymongo
 redis
+# ML dependencies
+openai-whisper==20231117
+transformers
+torch
+torchaudio
+numpy
+pandas
+scikit-learn
+requests
+pydub
+# For audio processing
+librosa
+soundfile

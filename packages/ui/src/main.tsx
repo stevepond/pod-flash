@@ -5,7 +5,6 @@ import "./index.css";
 const App = () => {
   // For now, we'll use a hardcoded digest ID
   // In a real app, this would come from the URL or props
-  const digestId = "test-digest-1";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -15,7 +14,7 @@ const App = () => {
         </div>
       </header>
       <main>
-        <DigestComponent digestId={digestId} />
+        <DigestComponent />
       </main>
     </div>
   );

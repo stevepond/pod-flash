@@ -48,7 +48,9 @@ async function setInCache(key: string, value: any): Promise<void> {
 export async function createDigest(digest: Digest): Promise<void> {
   await DigestModel.create(digest);
   await setInCache(`digest:${digest.id}`, digest);
-  await redisClient.del("digest:list"); // Invalidate list cache
+  // Re-cache the entire list
+  const digests = await DigestModel.find().sort({ createdAt: -1 });
+  await setInCache("digest:list", digests);
 }
 
 export async function getDigest(id: string): Promise<Digest | null> {
@@ -64,9 +66,11 @@ export async function getDigest(id: string): Promise<Digest | null> {
 
 export async function listDigests(): Promise<Digest[]> {
   const cached = await getFromCache<Digest[]>("digest:list");
+  console.log("got from cache", cached);
   if (cached) return cached;
 
   const digests = await DigestModel.find().sort({ createdAt: -1 });
+  console.log("got from db", digests);
   await setInCache("digest:list", digests);
   return digests;
 }
@@ -74,7 +78,9 @@ export async function listDigests(): Promise<Digest[]> {
 export async function updateDigest(id: string, digest: Digest): Promise<void> {
   await DigestModel.findOneAndUpdate({ id }, digest, { upsert: true });
   await setInCache(`digest:${id}`, digest);
-  await redisClient.del("digest:list"); // Invalidate list cache
+  // Re-cache the entire list
+  const digests = await DigestModel.find().sort({ createdAt: -1 });
+  await setInCache("digest:list", digests);
 }
 
 export async function deleteDigest(id: string): Promise<boolean> {

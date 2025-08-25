@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { updateDigest, getDigest } from "../storage/mongodb.js";
 import { emitDigestUpdate } from "../events/emitter.js";
 
-const ML_SIDECAR_URL = process.env.ML_SIDECAR_URL || "http://localhost:5000";
+const ML_SIDECAR_URL = process.env.ML_SIDECAR_URL || "http://localhost:5001";
 
 
 export async function processPodcastAudio(digestId: string): Promise<void> {

@@ -235,4 +235,86 @@ router.put("/:id", async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/digests/user-action - record user actions for recommendation training
+router.post("/user-action", async (req: Request, res: Response) => {
+  try {
+    const { userId, podcastId, action, metadata } = req.body;
+
+    if (!userId || !podcastId || !action) {
+      return res.status(400).json({ 
+        error: "userId, podcastId, and action are required" 
+      });
+    }
+
+    console.log(`Recording user action: ${action} by user ${userId} on podcast ${podcastId}`);
+
+    // Forward to ML sidecar
+    const ML_SIDECAR_URL = process.env.ML_SIDECAR_URL || "http://localhost:5001";
+    
+    const response = await fetch(`${ML_SIDECAR_URL}/user_action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        podcast_id: podcastId,
+        action,
+        timestamp: new Date().toISOString(),
+        metadata: metadata || {}
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`ML sidecar responded with status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(`User action recorded successfully: ${JSON.stringify(result)}`);
+
+    res.json({ success: true, message: "Action recorded successfully" });
+  } catch (error) {
+    console.error("Failed to record user action:", error);
+    res.status(500).json({ error: "Failed to record user action" });
+  }
+});
+
+// GET /api/digests/recommendations/:userId - get personalized recommendations for user
+router.get("/recommendations/:userId", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    console.log(`Getting recommendations for user: ${userId}`);
+
+    // Call ML sidecar to train/get recommendations
+    const ML_SIDECAR_URL = process.env.ML_SIDECAR_URL || "http://localhost:5001";
+    
+    const response = await fetch(`${ML_SIDECAR_URL}/train_recs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`ML sidecar responded with status: ${response.status}`);
+    }
+
+    const recommendations = await response.json();
+    console.log(`Recommendations generated for user ${userId}:`, recommendations);
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error("Failed to get recommendations:", error);
+    res.status(500).json({ error: "Failed to get recommendations" });
+  }
+});
+
 export default router;

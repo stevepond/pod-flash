@@ -159,7 +159,7 @@ services:
       context: .
       dockerfile: services/ml-sidecar/Dockerfile
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/pod-flash
       - REDIS_URL=redis://redis:6379
